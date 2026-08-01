@@ -321,7 +321,7 @@
   <div class="section-title">📅 요일별 패턴</div>
   <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
 
-  <div class="appver">줄담배 v1.4 · 2026-08-01</div>
+  <div class="appver">줄담배 v1.5 · 2026-08-01</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -809,8 +809,8 @@ function openDbx(){
   const redirectUri=location.origin+location.pathname;
   if(connected){
     let ac={}; try{ ac=JSON.parse(localStorage.getItem(DBX_ACCOUNT))||{}; }catch(e){}
-    body.innerHTML=`<div class="dbx-status"><b>☁ 연결됨</b>${ac.email?' · '+ac.email:''}<br>파일: <code>${DBX_FILE}</code></div>
-      <button class="primary-btn" onclick="syncDropbox()">지금 동기화</button>
+    body.innerHTML=`<div class="dbx-status"><b>☁ 연결됨</b>${ac.email?' · '+ac.email:''}<br>파일: <code>${DBX_FILE}</code><br>⚡ 실시간 자동 동기화 켜짐 (10초마다 · 기기 전환 시 즉시)</div>
+      <button class="primary-btn" onclick="manualSync()">지금 동기화</button>
       <button class="ghost-btn" onclick="dbxDisconnect()">연결 해제</button>`;
   } else {
     const appKey=localStorage.getItem(DBX_APPKEY)||'';
@@ -886,36 +886,57 @@ let _uploadTimer=null, _syncing=false;
 function scheduleUpload(){
   if(!dbxGetToken()) return;
   clearTimeout(_uploadTimer);
-  _uploadTimer=setTimeout(()=>syncDropbox(true),2500);
+  _uploadTimer=setTimeout(function attempt(){
+    if(_syncing){ _uploadTimer=setTimeout(attempt,500); return; } // 동기화 중이면 잠깐 대기 후 재시도
+    pushToDropbox();
+  }, 1200);
 }
-async function syncDropbox(uploadOnly){
+// 원격 내려받기 → 원격이 더 최신이면 채택 (업로드는 안 함)
+async function pullFromDropbox(notify){
+  let token=dbxGetToken(); if(!token||_syncing) return false;
+  _syncing=true; let adopted=false;
+  try{
+    let res=await _dbxDownload(token);
+    if(res.status===401){ token=await _dbxRefresh(); if(token) res=await _dbxDownload(token); }
+    if(res && res.ok){
+      const remote=JSON.parse(await res.text());
+      if(remote && remote.savedAt && remote.savedAt>localSavedAt()){
+        records=Array.isArray(remote.records)?remote.records.filter(x=>typeof x==='number'):records;
+        if(Array.isArray(remote.resisted)) resisted=remote.resisted.filter(x=>typeof x==='number');
+        if(remote.settings) settings=Object.assign(settings,remote.settings);
+        saveRecords(); saveResisted(); saveSettingsRaw();
+        localStorage.setItem(TKEY, remote.savedAt);
+        applyTheme(); render();
+        adopted=true;
+      }
+    }
+  }catch(e){}
+  _syncing=false;
+  if(adopted && notify) toast('다른 기기 데이터로 동기화됨',{type:'success'});
+  return adopted;
+}
+// 로컬 올리기
+async function pushToDropbox(){
   let token=dbxGetToken(); if(!token||_syncing) return;
   _syncing=true;
   try{
-    if(!uploadOnly){
-      let res=await _dbxDownload(token);
-      if(res.status===401){ token=await _dbxRefresh(); if(token) res=await _dbxDownload(token); }
-      if(res.ok){
-        const remote=JSON.parse(await res.text());
-        if(remote && remote.savedAt && remote.savedAt>localSavedAt()){
-          // 원격이 더 최신 → 채택
-          records=Array.isArray(remote.records)?remote.records.filter(x=>typeof x==='number'):records;
-          if(Array.isArray(remote.resisted)) resisted=remote.resisted.filter(x=>typeof x==='number');
-          if(remote.settings) settings=Object.assign(settings,remote.settings);
-          saveRecords(); saveResisted(); saveSettingsRaw();
-          localStorage.setItem(TKEY, remote.savedAt);
-          applyTheme(); render();
-          toast('Dropbox에서 최신 데이터를 불러왔어요',{type:'success'});
-          _syncing=false; return;
-        }
-      }
-    }
-    // 로컬 업로드
     const payload={records, resisted, settings, savedAt:localSavedAt()};
     let up=await _dbxUpload(token, payload);
     if(up.status===401){ token=await _dbxRefresh(); if(token) up=await _dbxUpload(token, payload); }
   }catch(e){}
   _syncing=false;
+}
+// pull 먼저, 채택 없으면 push (시작/온라인 복귀 시)
+async function syncDropbox(){
+  const adopted=await pullFromDropbox(true);
+  if(!adopted) await pushToDropbox();
+}
+async function manualSync(){
+  if(!dbxGetToken()) return;
+  toast('동기화 중…');
+  const adopted=await pullFromDropbox(false);
+  if(!adopted) await pushToDropbox();
+  toast('동기화 완료',{type:'success'});
 }
 
 // ── 자정 넘김 자동 갱신 ──
@@ -929,6 +950,12 @@ applyTheme();
 render();
 updateDbxLabel();
 dbxHandleCallback().then(()=>{ if(dbxGetToken()) syncDropbox(); });
+
+// ── 실시간 동기화: 폴링(보일 때 10초) + 가시성/포커스/온라인 시 즉시 ──
+setInterval(()=>{ if(dbxGetToken() && document.visibilityState==='visible') pullFromDropbox(false); }, 10000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && dbxGetToken()) pullFromDropbox(true); });
+window.addEventListener('focus',()=>{ if(dbxGetToken()) pullFromDropbox(true); });
+window.addEventListener('online',()=>{ if(dbxGetToken()) syncDropbox(); });
 </script>
 </body>
 </html>
