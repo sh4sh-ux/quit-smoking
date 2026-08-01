@@ -238,6 +238,12 @@
   .field-row .field{flex:1;}
   .bar.over{background:linear-gradient(180deg,#ff8a7a,var(--danger));}
   .appver{text-align:center; font-size:11px; color:var(--dim); margin-top:26px; opacity:.7; user-select:none;}
+  .hcol{cursor:pointer;}
+  .hourhint{font-size:11px; color:var(--dim); text-align:center; margin-top:10px;}
+  .tlist .row{display:flex; align-items:center; justify-content:space-between; padding:13px 6px; border-bottom:1px solid var(--line); font-size:14px;}
+  .tlist .row:last-child{border-bottom:none;}
+  .tlist .row .d{color:var(--sub); font-size:13px;}
+  .tlist .row .t{font-weight:700;}
 </style>
 </head>
 <body>
@@ -309,12 +315,13 @@
   <div class="card">
     <div class="hours" id="hourBars"></div>
     <div class="hlabels"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>23시</span></div>
+    <div class="hourhint">막대를 탭하면 그 시간대에 정확히 몇 시 몇 분에 피웠는지 볼 수 있어요</div>
   </div>
 
   <div class="section-title">📅 요일별 패턴</div>
   <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
 
-  <div class="appver">줄담배 v1.3 · 2026-08-01</div>
+  <div class="appver">줄담배 v1.4 · 2026-08-01</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -376,6 +383,13 @@
     <div class="hint">앱 쓰기 전 하루 평균. 이보다 덜 피운 만큼 "아낀 담배·돈"으로 계산돼요.</div>
   </div>
   <button class="primary-btn" onclick="saveGoalSettings()">저장</button>
+</div>
+
+<!-- 시간대 상세 -->
+<div class="sheet" id="hourSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-title" id="hourTitle">🕒 시간대</div>
+  <div id="hourBody"></div>
 </div>
 
 <!-- Dropbox -->
@@ -622,9 +636,9 @@ function renderHours(sorted){
   if(!sorted.length){ box.innerHTML=`<div class="empty">아직 기록이 없어요</div>`; return; }
   const b=new Array(24).fill(0); sorted.forEach(t=>b[new Date(t).getHours()]++);
   const max=Math.max(1,...b);
-  box.innerHTML=b.map(c=>{
+  box.innerHTML=b.map((c,i)=>{
     const h=c?Math.max(3,(c/max)*84):2, op=c?(0.4+0.6*(c/max)):0.12;
-    return `<div class="hcol"><div class="hbar" style="height:${h}px; opacity:${op}"></div></div>`;
+    return `<div class="hcol" onclick="openHourDetail(${i})"><div class="hbar" style="height:${h}px; opacity:${op}"></div></div>`;
   }).join('');
 }
 function renderWeekdays(sorted){
@@ -669,8 +683,25 @@ function showSheet(id){
   document.getElementById(id).classList.add('show');
 }
 function closeSheets(keepOverlay){
-  ['menuSheet','settingsSheet','goalSheet','dbxSheet'].forEach(i=>document.getElementById(i).classList.remove('show'));
+  ['menuSheet','settingsSheet','goalSheet','hourSheet','dbxSheet'].forEach(i=>document.getElementById(i).classList.remove('show'));
   if(!keepOverlay) document.getElementById('overlay').classList.remove('show');
+}
+
+// ── 시간대 상세 (정확한 시각) ──
+function hourLabel(h){ const ap=h<12?'오전':'오후'; let hh=h%12; if(hh===0)hh=12; return `${ap} ${hh}시`; }
+function fmtDateTime(ts){
+  const d=new Date(ts), wd=['일','월','화','수','목','금','토'][d.getDay()];
+  let h=d.getHours(); const mm=String(d.getMinutes()).padStart(2,'0');
+  const ap=h<12?'오전':'오후'; let hh=h%12; if(hh===0)hh=12;
+  return {date:`${d.getMonth()+1}월 ${d.getDate()}일 (${wd})`, time:`${ap} ${hh}:${mm}`};
+}
+function openHourDetail(h){
+  const items=records.filter(t=>new Date(t).getHours()===h).sort((a,b)=>b-a);
+  document.getElementById('hourTitle').textContent=`🕒 ${hourLabel(h)}대 · ${items.length}회`;
+  const body=document.getElementById('hourBody');
+  if(!items.length) body.innerHTML=`<div class="empty">이 시간대에 기록이 없어요</div>`;
+  else body.innerHTML=`<div class="tlist">`+items.map(t=>{const f=fmtDateTime(t);return `<div class="row"><span class="d">${f.date}</span><span class="t">${f.time}</span></div>`;}).join('')+`</div>`;
+  showSheet('hourSheet');
 }
 
 // ── 목표 설정 ──
