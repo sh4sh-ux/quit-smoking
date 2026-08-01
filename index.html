@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f5f6f8" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="줄담배">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>줄담배 — 흡연 기록</title>
+<style>
+  :root{
+    color-scheme:light dark;
+    /* ── 라이트 (기본) ── */
+    --bg:#f5f6f8; --card:#ffffff; --card2:#f7f8fa;
+    --line:#e7e9ef; --line2:#d9dce4;
+    --text:#16181d; --sub:#5b6472; --dim:#9aa2b1;
+    --accent:#ff6a3d; --accent-d:#ff5423;
+    --good:#12a15b; --danger:#e5484d;
+    --money:#c76a00; --money-bg:rgba(255,150,40,.10);
+    --shadow:0 8px 24px rgba(20,24,40,.07);
+    --btn-shadow:0 12px 26px rgba(255,84,35,.26);
+    --bar-top:#ffb457; --bar-bot:#ff6a3d;
+    --tbar-top:#7cc9ff; --tbar-bot:#3d9bff; --tbar-txt:#2f8ae0;
+    --track:rgba(20,24,40,.06);
+    --sheet-bg:#ffffff;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1420; --card:#1b2437; --card2:#212c44;
+    --line:#2a3550; --line2:#38456a;
+    --text:#eef2fb; --sub:#93a0bd; --dim:#66739a;
+    --accent:#ff7a59; --accent-d:#ff5c3c;
+    --good:#4ecb8d; --danger:#ff5c6c;
+    --money:#ffb457; --money-bg:rgba(255,180,87,.10);
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --btn-shadow:0 12px 28px rgba(255,92,60,.35);
+    --bar-top:#ffb457; --bar-bot:#ff7a59;
+    --tbar-top:#7ee0ff; --tbar-bot:#4fb6ff; --tbar-txt:#4fb6ff;
+    --track:rgba(255,255,255,.05);
+    --sheet-bg:#161d2e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1420; --card:#1b2437; --card2:#212c44;
+      --line:#2a3550; --line2:#38456a;
+      --text:#eef2fb; --sub:#93a0bd; --dim:#66739a;
+      --accent:#ff7a59; --accent-d:#ff5c3c;
+      --good:#4ecb8d; --danger:#ff5c6c;
+      --money:#ffb457; --money-bg:rgba(255,180,87,.10);
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --btn-shadow:0 12px 28px rgba(255,92,60,.35);
+      --bar-top:#ffb457; --bar-bot:#ff7a59;
+      --tbar-top:#7ee0ff; --tbar-bot:#4fb6ff; --tbar-txt:#4fb6ff;
+      --track:rgba(255,255,255,.05);
+      --sheet-bg:#161d2e;
+    }
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    -webkit-font-smoothing:antialiased; transition:background .2s,color .2s;
+  }
+  .wrap{max-width:520px; margin:0 auto; padding:18px 16px 44px;}
+
+  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;}
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand .logo{font-size:24px;}
+  .brand h1{font-size:19px; font-weight:800; margin:0; letter-spacing:-.3px;}
+  .brand .sub{font-size:12px; color:var(--dim); margin-top:1px;}
+  .hbtns{display:flex; gap:8px;}
+  .icon-btn{background:var(--card); border:1px solid var(--line); color:var(--sub);
+    width:40px; height:40px; border-radius:12px; font-size:17px; cursor:pointer; box-shadow:var(--shadow);}
+  .icon-btn:active{transform:scale(.94);}
+
+  .today{
+    background:var(--card); border:1px solid var(--line); border-radius:22px; padding:22px 20px;
+    box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .today-top{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px;}
+  .today-label{font-size:13px; color:var(--sub); font-weight:600; margin-bottom:6px;}
+  .today-count{font-size:54px; font-weight:800; line-height:1; letter-spacing:-2px;}
+  .today-count small{font-size:19px; font-weight:600; color:var(--sub); margin-left:4px; letter-spacing:0;}
+  .today-money{display:inline-block; margin-top:12px; font-size:14px; font-weight:700; color:var(--money);
+    background:var(--money-bg); padding:5px 11px; border-radius:9px;}
+  .today-vs{text-align:right; font-size:12px; color:var(--sub); line-height:1.5;}
+  .today-vs b{display:block; font-size:15px; font-weight:700;}
+  .up{color:var(--danger);} .down{color:var(--good);}
+
+  .lastline{display:flex; gap:10px;}
+  .chip{flex:1; background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:11px 13px;}
+  .chip .k{font-size:11px; color:var(--dim); margin-bottom:4px;}
+  .chip .v{font-size:16px; font-weight:700;}
+
+  .logbtn{
+    width:100%; border:none; cursor:pointer; color:#fff;
+    background:linear-gradient(145deg,var(--accent) 0%,var(--accent-d) 100%);
+    border-radius:22px; padding:24px; font-size:20px; font-weight:800;
+    box-shadow:var(--btn-shadow); margin-bottom:11px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform .08s ease, box-shadow .15s ease; letter-spacing:-.3px;
+  }
+  .logbtn:active{transform:scale(.97);}
+  .logbtn .ic{font-size:23px;}
+  .undo{
+    width:100%; background:var(--card); border:1px solid var(--line); color:var(--sub);
+    border-radius:14px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:26px;
+    box-shadow:var(--shadow);
+  }
+  .undo:disabled{opacity:.45; box-shadow:none;}
+
+  .section-title{font-size:15px; font-weight:800; margin:0 2px 11px; letter-spacing:-.3px;
+    display:flex; align-items:center; gap:7px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:19px 17px; margin-bottom:16px; box-shadow:var(--shadow);}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:15px 10px;
+    text-align:center; box-shadow:var(--shadow);}
+  .stat .n{font-size:23px; font-weight:800; letter-spacing:-1px;}
+  .stat .n.money{color:var(--money); font-size:19px;}
+  .stat .l{font-size:11px; color:var(--dim); margin-top:3px;}
+
+  .bars{display:flex; align-items:flex-end; gap:8px; height:150px; padding-top:6px;}
+  .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px;}
+  .bar-val{font-size:11px; color:var(--sub); font-weight:700; min-height:14px;}
+  .bar{width:100%; max-width:34px; background:linear-gradient(180deg,var(--bar-top),var(--bar-bot));
+    border-radius:8px 8px 4px 4px; min-height:4px; transition:height .3s ease;}
+  .bar.today-bar{background:linear-gradient(180deg,var(--tbar-top),var(--tbar-bot));}
+  .bar-lbl{font-size:10px; color:var(--dim); margin-top:7px;}
+  .bar-col.is-today .bar-lbl{color:var(--tbar-txt); font-weight:700;}
+
+  .hours{display:flex; gap:3px; align-items:flex-end; height:90px;}
+  .hcol{flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%;}
+  .hbar{width:100%; background:var(--accent); border-radius:3px; min-height:2px;}
+  .hlabels{display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color:var(--dim);}
+
+  .weekdays{display:flex; flex-direction:column; gap:9px;}
+  .wd-row{display:flex; align-items:center; gap:10px;}
+  .wd-name{width:22px; font-size:13px; color:var(--sub); font-weight:600; flex-shrink:0;}
+  .wd-track{flex:1; background:var(--track); border-radius:8px; height:22px; overflow:hidden;}
+  .wd-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--bar-top)); border-radius:8px; min-width:2px; transition:width .3s;}
+  .wd-num{width:26px; text-align:right; font-size:13px; font-weight:700; color:var(--sub); flex-shrink:0;}
+
+  .empty{text-align:center; color:var(--dim); font-size:13px; padding:20px 10px; line-height:1.6; width:100%;}
+
+  .toast{position:fixed; left:50%; bottom:calc(30px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(20px); background:#2a3550; color:#fff;
+    padding:13px 20px; border-radius:14px; font-size:14px; font-weight:600;
+    box-shadow:0 10px 30px rgba(0,0,0,.3); opacity:0; pointer-events:none; transition:.25s; z-index:80; white-space:nowrap;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.success{background:var(--good);} .toast.error{background:var(--danger);}
+
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:.2s; z-index:50;}
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .sheet{position:fixed; left:0; right:0; bottom:0; background:var(--sheet-bg);
+    border-radius:22px 22px 0 0; border-top:1px solid var(--line);
+    padding:10px 16px calc(24px + env(safe-area-inset-bottom));
+    transform:translateY(110%); transition:transform .25s ease; z-index:51; max-width:520px; margin:0 auto;
+    max-height:86vh; overflow-y:auto;}
+  .sheet.show{transform:translateY(0);}
+  .sheet-grip{width:40px; height:4px; background:var(--line2); border-radius:3px; margin:8px auto 14px;}
+  .sheet-title{font-size:16px; font-weight:800; margin:2px 4px 14px; letter-spacing:-.3px;}
+  .sheet-item{display:flex; align-items:center; gap:13px; padding:15px 8px; font-size:15px;
+    cursor:pointer; border-radius:12px; color:var(--text);}
+  .sheet-item:active{background:var(--card2);}
+  .sheet-item.danger{color:var(--danger);}
+  .sheet-item .si-ic{font-size:18px; width:24px; text-align:center;}
+  .sheet-item .si-sub{font-size:12px; color:var(--dim); margin-left:auto; font-weight:600;}
+  .sheet-sep{height:1px; background:var(--line); margin:6px 8px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--sub); font-weight:600; margin:0 2px 6px;}
+  .field input{width:100%; background:var(--card2); border:1px solid var(--line2); color:var(--text);
+    border-radius:12px; padding:13px 14px; font-size:15px; font-weight:600; outline:none;}
+  .field input:focus{border-color:var(--accent);}
+  .field .hint{font-size:11px; color:var(--dim); margin:6px 2px 0; line-height:1.5;}
+  .field .hint code{background:var(--card2); padding:2px 6px; border-radius:5px; font-size:10.5px; word-break:break-all;}
+  .primary-btn{width:100%; border:none; background:linear-gradient(145deg,var(--accent),var(--accent-d)); color:#fff;
+    border-radius:14px; padding:14px; font-size:15px; font-weight:700; cursor:pointer; box-shadow:var(--btn-shadow);}
+  .ghost-btn{width:100%; border:1px solid var(--line2); background:var(--card2); color:var(--sub);
+    border-radius:14px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; margin-top:9px;}
+  .seg{display:flex; gap:6px; background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:4px;}
+  .seg button{flex:1; border:none; background:transparent; color:var(--sub); font-size:13px; font-weight:600;
+    padding:9px; border-radius:9px; cursor:pointer;}
+  .seg button.on{background:var(--accent); color:#fff;}
+  .dbx-status{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:14px;
+    font-size:13px; color:var(--sub);}
+  .dbx-status b{color:var(--good);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="logo">🚭</span>
+      <div>
+        <h1>줄담배</h1>
+        <div class="sub">천천히, 하나씩 줄이기</div>
+      </div>
+    </div>
+    <div class="hbtns">
+      <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" title="테마">🌓</button>
+      <button class="icon-btn" onclick="openMenu()" title="메뉴">⋯</button>
+    </div>
+  </header>
+
+  <div class="today">
+    <div class="today-top">
+      <div>
+        <div class="today-label">오늘 흡연</div>
+        <div class="today-count"><span id="todayCount">0</span><small>개비</small></div>
+        <div class="today-money" id="todayMoney">0원</div>
+      </div>
+      <div class="today-vs" id="vsBox"></div>
+    </div>
+    <div class="lastline">
+      <div class="chip"><div class="k">마지막 흡연</div><div class="v" id="lastTime">—</div></div>
+      <div class="chip"><div class="k">직전 간격</div><div class="v" id="lastGap">—</div></div>
+    </div>
+  </div>
+
+  <button class="logbtn" onclick="logOne()"><span class="ic">🚬</span> 한 대 피웠어요</button>
+  <button class="undo" id="undoBtn" onclick="undoLast()" disabled>방금 기록 취소</button>
+
+  <div class="section-title">📊 요약</div>
+  <div class="stat-grid">
+    <div class="stat"><div class="n" id="stAvg">0</div><div class="l">하루 평균</div></div>
+    <div class="stat"><div class="n" id="st7">0</div><div class="l">최근 7일</div></div>
+    <div class="stat"><div class="n" id="stTotal">0</div><div class="l">전체 누적</div></div>
+  </div>
+
+  <div class="section-title">💸 지출</div>
+  <div class="stat-grid">
+    <div class="stat"><div class="n money" id="mToday">0원</div><div class="l">오늘</div></div>
+    <div class="stat"><div class="n money" id="m7">0원</div><div class="l">최근 7일</div></div>
+    <div class="stat"><div class="n money" id="mTotal">0원</div><div class="l">누적</div></div>
+  </div>
+
+  <div class="section-title">📈 최근 7일 추이</div>
+  <div class="card"><div class="bars" id="dailyBars"></div></div>
+
+  <div class="section-title">🕒 시간대별 패턴</div>
+  <div class="card">
+    <div class="hours" id="hourBars"></div>
+    <div class="hlabels"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>23시</span></div>
+  </div>
+
+  <div class="section-title">📅 요일별 패턴</div>
+  <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 메인 메뉴 -->
+<div class="overlay" id="overlay" onclick="closeSheets()"></div>
+<div class="sheet" id="menuSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-item" id="dbxMenuItem" onclick="openDbx()"><span class="si-ic">☁️</span> <span id="dbxMenuLabel">Dropbox 연결 / 동기화</span></div>
+  <div class="sheet-item" onclick="openSettings()"><span class="si-ic">💰</span> 단가 설정 <span class="si-sub" id="priceSub">240원/개비</span></div>
+  <div class="sheet-sep"></div>
+  <div class="sheet-item" onclick="exportJSON()"><span class="si-ic">💾</span> 데이터 백업 (JSON)</div>
+  <div class="sheet-item" onclick="document.getElementById('importFile').click()"><span class="si-ic">📂</span> 데이터 불러오기</div>
+  <div class="sheet-sep"></div>
+  <div class="sheet-item danger" onclick="resetAll()"><span class="si-ic">🗑️</span> 전체 기록 초기화</div>
+</div>
+
+<!-- 단가 설정 -->
+<div class="sheet" id="settingsSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-title">💰 단가 설정</div>
+  <div class="field">
+    <label>담배 한 갑 가격 (원)</label>
+    <input type="number" id="inPack" inputmode="numeric" placeholder="4800">
+  </div>
+  <div class="field">
+    <label>한 갑 개비 수</label>
+    <input type="number" id="inCigs" inputmode="numeric" placeholder="20">
+    <div class="hint">개비당 단가 = 갑 가격 ÷ 개비 수 · 현재 <b id="perCigHint">240원</b></div>
+  </div>
+  <button class="primary-btn" onclick="saveSettings()">저장</button>
+</div>
+
+<!-- Dropbox -->
+<div class="sheet" id="dbxSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-title">☁️ Dropbox</div>
+  <div id="dbxBody"></div>
+</div>
+
+<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)">
+
+<script>
+const KEY='quitsmoking_v1', SKEY='quitsmoking_settings', TKEY='quitsmoking_savedAt';
+const DBX_APPKEY='qs_dbx_appkey', DBX_TOKEN='qs_dbx_token', DBX_REFRESH='qs_dbx_refresh', DBX_ACCOUNT='qs_dbx_account';
+const DBX_FILE='/01_Personal/Quit-Smoking/quit-smoking.json';
+
+let records=loadRecords();
+let settings=loadSettings();
+
+function loadRecords(){ try{const r=JSON.parse(localStorage.getItem(KEY)); return Array.isArray(r)?r:[];}catch(e){return [];} }
+function loadSettings(){
+  let s={}; try{ s=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
+  return Object.assign({pricePerPack:4800, cigsPerPack:20, theme:'auto'}, s);
+}
+function perCig(){ const c=settings.cigsPerPack||20; return c>0? (settings.pricePerPack||0)/c : 0; }
+function saveRecords(){ localStorage.setItem(KEY, JSON.stringify(records)); }
+function saveSettingsRaw(){ localStorage.setItem(SKEY, JSON.stringify(settings)); }
+function bump(){ localStorage.setItem(TKEY, new Date().toISOString()); scheduleUpload(); }
+function localSavedAt(){ return localStorage.getItem(TKEY)||'1970-01-01T00:00:00.000Z'; }
+
+const won = n => Math.round(n).toLocaleString('ko-KR')+'원';
+
+// ── 날짜 유틸 ──
+function startOfDay(ts){ const d=new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+function dayKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtGap(ms){
+  if(ms<0) return '—';
+  const min=Math.floor(ms/60000);
+  if(min<1) return '방금';
+  if(min<60) return min+'분 전';
+  const h=Math.floor(min/60), mm=min%60;
+  if(h<24) return mm? `${h}시간 ${mm}분 전` : `${h}시간 전`;
+  return `${Math.floor(h/24)}일 전`;
+}
+function fmtDur(ms){
+  const min=Math.floor(ms/60000);
+  if(min<60) return min+'분';
+  const h=Math.floor(min/60), mm=min%60;
+  return mm? `${h}시간 ${mm}분` : `${h}시간`;
+}
+
+// ── 기록 ──
+function logOne(){
+  records.push(Date.now());
+  saveRecords(); bump(); render();
+  if(navigator.vibrate) navigator.vibrate(30);
+  toast('기록됨 · '+won(perCig())+' 🚬');
+}
+function undoLast(){
+  if(!records.length) return;
+  records.sort((a,b)=>a-b); records.pop();
+  saveRecords(); bump(); render();
+  toast('취소했어요');
+}
+
+// ── 렌더 ──
+function render(){
+  const now=Date.now();
+  const sorted=[...records].sort((a,b)=>a-b);
+  const todayStart=startOfDay(now), yStart=todayStart-86400000;
+  const todayCount=sorted.filter(t=>t>=todayStart).length;
+  const yCount=sorted.filter(t=>t>=yStart && t<todayStart).length;
+  const pc=perCig();
+
+  document.getElementById('todayCount').textContent=todayCount;
+  document.getElementById('todayMoney').textContent='오늘 '+won(todayCount*pc);
+
+  const vs=document.getElementById('vsBox');
+  if(yCount===0 && todayCount===0){ vs.innerHTML=''; }
+  else{
+    const diff=todayCount-yCount; let cls='',arrow='',txt='';
+    if(diff>0){cls='up';arrow='▲';txt=diff+'개';}
+    else if(diff<0){cls='down';arrow='▼';txt=(-diff)+'개';}
+    else{cls='';arrow='=';txt='동일';}
+    vs.innerHTML=`어제 대비<b class="${cls}">${arrow} ${txt}</b><span style="color:var(--dim)">어제 ${yCount}개</span>`;
+  }
+
+  const lastEl=document.getElementById('lastTime'), gapEl=document.getElementById('lastGap');
+  if(sorted.length){
+    const last=sorted[sorted.length-1];
+    lastEl.textContent=fmtGap(now-last);
+    gapEl.textContent= sorted.length>=2? fmtDur(last-sorted[sorted.length-2]) : '—';
+  } else { lastEl.textContent='—'; gapEl.textContent='—'; }
+
+  document.getElementById('undoBtn').disabled=records.length===0;
+
+  // 요약
+  const total=sorted.length;
+  document.getElementById('stTotal').textContent=total;
+  const last7=sorted.filter(t=>t>=now-7*86400000).length;
+  document.getElementById('st7').textContent=last7;
+  if(total){
+    const firstDay=startOfDay(sorted[0]);
+    const days=Math.max(1, Math.round((todayStart-firstDay)/86400000)+1);
+    const avg=total/days;
+    document.getElementById('stAvg').textContent=(avg>=10?Math.round(avg):avg.toFixed(1));
+  } else document.getElementById('stAvg').textContent='0';
+
+  // 지출
+  document.getElementById('mToday').textContent=won(todayCount*pc);
+  document.getElementById('m7').textContent=won(last7*pc);
+  document.getElementById('mTotal').textContent=won(total*pc);
+
+  renderDaily(sorted, todayStart);
+  renderHours(sorted);
+  renderWeekdays(sorted);
+  document.getElementById('priceSub').textContent=won(pc)+'/개비';
+}
+
+function renderDaily(sorted, todayStart){
+  const box=document.getElementById('dailyBars'); const days=[];
+  for(let i=6;i>=0;i--){
+    const s=todayStart-i*86400000, e=s+86400000;
+    const c=sorted.filter(t=>t>=s && t<e).length;
+    days.push({count:c, label:['일','월','화','수','목','금','토'][new Date(s).getDay()], isToday:i===0});
+  }
+  const max=Math.max(1,...days.map(d=>d.count));
+  box.innerHTML=days.map(d=>{
+    const h=d.count? Math.max(6,(d.count/max)*118):4;
+    return `<div class="bar-col ${d.isToday?'is-today':''}"><div class="bar-val">${d.count||''}</div><div class="bar ${d.isToday?'today-bar':''}" style="height:${h}px"></div><div class="bar-lbl">${d.label}</div></div>`;
+  }).join('');
+}
+function renderHours(sorted){
+  const box=document.getElementById('hourBars');
+  if(!sorted.length){ box.innerHTML=`<div class="empty">아직 기록이 없어요</div>`; return; }
+  const b=new Array(24).fill(0); sorted.forEach(t=>b[new Date(t).getHours()]++);
+  const max=Math.max(1,...b);
+  box.innerHTML=b.map(c=>{
+    const h=c?Math.max(3,(c/max)*84):2, op=c?(0.4+0.6*(c/max)):0.12;
+    return `<div class="hcol"><div class="hbar" style="height:${h}px; opacity:${op}"></div></div>`;
+  }).join('');
+}
+function renderWeekdays(sorted){
+  const box=document.getElementById('weekdayRows');
+  const names=['일','월','화','수','목','금','토'], c=new Array(7).fill(0);
+  sorted.forEach(t=>c[new Date(t).getDay()]++);
+  const max=Math.max(1,...c);
+  box.innerHTML=names.map((n,i)=>`<div class="wd-row"><div class="wd-name">${n}</div><div class="wd-track"><div class="wd-fill" style="width:${(c[i]/max)*100}%"></div></div><div class="wd-num">${c[i]}</div></div>`).join('');
+}
+
+// ── 테마 ──
+function applyTheme(){
+  const t=settings.theme;
+  const root=document.documentElement;
+  if(t==='light'||t==='dark') root.setAttribute('data-theme',t);
+  else root.removeAttribute('data-theme');
+  // 버튼 아이콘
+  document.getElementById('themeBtn').textContent = t==='light'?'☀️':(t==='dark'?'🌙':'🌓');
+  // theme-color
+  const dark = t==='dark' || (t==='auto' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+  document.getElementById('themeColorMeta').setAttribute('content', dark?'#0f1420':'#f5f6f8');
+}
+function cycleTheme(){
+  const order=['auto','light','dark'];
+  settings.theme=order[(order.indexOf(settings.theme)+1)%3];
+  saveSettingsRaw(); bump(); applyTheme();
+  toast('테마: '+({auto:'자동',light:'라이트',dark:'다크'})[settings.theme]);
+}
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{ if(settings.theme==='auto') applyTheme(); });
+
+// ── 시트 ──
+function openMenu(){ showSheet('menuSheet'); }
+function openSettings(){
+  document.getElementById('inPack').value=settings.pricePerPack;
+  document.getElementById('inCigs').value=settings.cigsPerPack;
+  document.getElementById('perCigHint').textContent=won(perCig());
+  showSheet('settingsSheet');
+}
+function showSheet(id){
+  closeSheets(true);
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+function closeSheets(keepOverlay){
+  ['menuSheet','settingsSheet','dbxSheet'].forEach(i=>document.getElementById(i).classList.remove('show'));
+  if(!keepOverlay) document.getElementById('overlay').classList.remove('show');
+}
+document.getElementById('inCigs').addEventListener('input',updatePerCigHint);
+document.getElementById('inPack').addEventListener('input',updatePerCigHint);
+function updatePerCigHint(){
+  const p=parseFloat(document.getElementById('inPack').value)||0;
+  const c=parseFloat(document.getElementById('inCigs').value)||0;
+  document.getElementById('perCigHint').textContent=won(c>0?p/c:0);
+}
+function saveSettings(){
+  const p=parseFloat(document.getElementById('inPack').value);
+  const c=parseFloat(document.getElementById('inCigs').value);
+  if(!(p>=0) || !(c>0)){ toast('올바른 값을 입력해주세요',{type:'error'}); return; }
+  settings.pricePerPack=p; settings.cigsPerPack=c;
+  saveSettingsRaw(); bump(); render(); closeSheets(); toast('저장했어요',{type:'success'});
+}
+
+// ── 백업 / 불러오기 / 초기화 ──
+function exportJSON(){
+  const payload={records, settings, savedAt:localSavedAt()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='줄담배_백업_'+dayKey(Date.now())+'.json'; a.click();
+  closeSheets();
+}
+function importJSON(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      const recs = Array.isArray(d)? d : d.records;
+      if(!Array.isArray(recs)) throw 0;
+      records=recs.filter(x=>typeof x==='number');
+      if(d.settings) settings=Object.assign(settings,d.settings);
+      saveRecords(); saveSettingsRaw(); bump(); applyTheme(); render(); closeSheets();
+      toast('불러왔어요 ('+records.length+'개)',{type:'success'});
+    }catch(err){ toast('불러오기 실패',{type:'error'}); }
+  };
+  r.readAsText(f); e.target.value='';
+}
+function resetAll(){
+  if(!confirm('모든 흡연 기록을 삭제할까요? 되돌릴 수 없어요.')) return;
+  records=[]; saveRecords(); bump(); render(); closeSheets(); toast('초기화했어요');
+}
+
+// ── 토스트 ──
+let toastTimer;
+function toast(msg,opt){
+  const el=document.getElementById('toast');
+  el.className='toast show'+(opt&&opt.type?' '+opt.type:'');
+  el.textContent=msg;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),1900);
+}
+
+/* ═══════════ Dropbox 동기화 (PKCE) ═══════════ */
+function dbxGetToken(){ return localStorage.getItem(DBX_TOKEN); }
+async function _sha256b64url(str){ const d=new TextEncoder().encode(str); const h=await crypto.subtle.digest('SHA-256',d); return btoa(String.fromCharCode(...new Uint8Array(h))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function _randomStr(len){ const a=new Uint8Array(len); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'').slice(0,len); }
+
+function openDbx(){
+  const body=document.getElementById('dbxBody');
+  const connected=!!dbxGetToken();
+  const redirectUri=location.origin+location.pathname;
+  if(connected){
+    let ac={}; try{ ac=JSON.parse(localStorage.getItem(DBX_ACCOUNT))||{}; }catch(e){}
+    body.innerHTML=`<div class="dbx-status"><b>☁ 연결됨</b>${ac.email?' · '+ac.email:''}<br>파일: <code>${DBX_FILE}</code></div>
+      <button class="primary-btn" onclick="syncDropbox()">지금 동기화</button>
+      <button class="ghost-btn" onclick="dbxDisconnect()">연결 해제</button>`;
+  } else {
+    const appKey=localStorage.getItem(DBX_APPKEY)||'';
+    body.innerHTML=`<div class="field">
+        <label>Dropbox App Key</label>
+        <input id="dbxAppKey" placeholder="앱 키 입력" value="${appKey.replace(/"/g,'&quot;')}">
+        <div class="hint">1. Dropbox 개발자 콘솔에서 앱 생성 (Scoped, App folder 또는 Full)<br>
+        2. Permissions: <code>files.content.write</code>, <code>files.content.read</code>, <code>account_info.read</code><br>
+        3. Redirect URI 추가: <code>${redirectUri}</code><br>
+        4. App key 복사해 위에 입력</div>
+      </div>
+      <button class="primary-btn" onclick="dbxConnect()">Dropbox 연결하기</button>`;
+  }
+  showSheet('dbxSheet');
+}
+async function dbxConnect(){
+  const appKey=(document.getElementById('dbxAppKey').value||'').trim();
+  if(!appKey){ toast('App Key를 입력해주세요',{type:'error'}); return; }
+  localStorage.setItem(DBX_APPKEY,appKey);
+  const verifier=_randomStr(64), challenge=await _sha256b64url(verifier);
+  localStorage.setItem('qs_dbx_verifier',verifier);
+  const redirectUri=location.origin+location.pathname;
+  const params=new URLSearchParams({client_id:appKey,redirect_uri:redirectUri,response_type:'code',code_challenge:challenge,code_challenge_method:'S256',token_access_type:'offline'});
+  location.href='https://www.dropbox.com/oauth2/authorize?'+params;
+}
+async function dbxHandleCallback(){
+  const u=new URL(location.href);
+  const code=u.searchParams.get('code'); if(!code) return;
+  const verifier=localStorage.getItem('qs_dbx_verifier');
+  const appKey=localStorage.getItem(DBX_APPKEY);
+  const redirectUri=location.origin+location.pathname;
+  // 쿼리 제거
+  history.replaceState({},'',redirectUri);
+  if(!verifier||!appKey){ toast('연결 실패, 다시 시도해주세요',{type:'error'}); return; }
+  localStorage.removeItem('qs_dbx_verifier');
+  try{
+    const res=await fetch('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code,grant_type:'authorization_code',client_id:appKey,redirect_uri:redirectUri,code_verifier:verifier})});
+    const data=await res.json();
+    if(!data.access_token) throw 0;
+    localStorage.setItem(DBX_TOKEN,data.access_token);
+    if(data.refresh_token) localStorage.setItem(DBX_REFRESH,data.refresh_token);
+    try{ const acRes=await fetch('https://api.dropboxapi.com/2/users/get_current_account',{method:'POST',headers:{Authorization:`Bearer ${data.access_token}`}}); const ac=await acRes.json(); localStorage.setItem(DBX_ACCOUNT,JSON.stringify({name:ac.name?.display_name||'',email:ac.email||''})); }catch(e){}
+    toast('Dropbox 연결됐어요!',{type:'success'});
+    updateDbxLabel();
+    await syncDropbox();
+  }catch(e){ toast('연결에 실패했어요',{type:'error'}); }
+}
+async function _dbxRefresh(){
+  const refresh=localStorage.getItem(DBX_REFRESH), appKey=localStorage.getItem(DBX_APPKEY);
+  if(!refresh||!appKey) return null;
+  try{
+    const res=await fetch('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',refresh_token:refresh,client_id:appKey})});
+    const data=await res.json();
+    if(data.access_token){ localStorage.setItem(DBX_TOKEN,data.access_token); return data.access_token; }
+  }catch(e){}
+  return null;
+}
+function dbxDisconnect(){
+  if(!confirm('Dropbox 연결을 해제할까요?')) return;
+  [DBX_TOKEN,DBX_REFRESH,DBX_ACCOUNT].forEach(k=>localStorage.removeItem(k));
+  updateDbxLabel(); closeSheets(); toast('연결 해제됨');
+}
+function updateDbxLabel(){
+  document.getElementById('dbxMenuLabel').textContent = dbxGetToken()? 'Dropbox 연결됨 · 동기화' : 'Dropbox 연결 / 동기화';
+}
+async function _dbxUpload(token, payload){
+  return fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/octet-stream','Dropbox-API-Arg':JSON.stringify({path:DBX_FILE,mode:'overwrite',autorename:false,mute:true})},body:JSON.stringify(payload,null,2)});
+}
+async function _dbxDownload(token){
+  return fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}});
+}
+let _uploadTimer=null, _syncing=false;
+function scheduleUpload(){
+  if(!dbxGetToken()) return;
+  clearTimeout(_uploadTimer);
+  _uploadTimer=setTimeout(()=>syncDropbox(true),2500);
+}
+async function syncDropbox(uploadOnly){
+  let token=dbxGetToken(); if(!token||_syncing) return;
+  _syncing=true;
+  try{
+    if(!uploadOnly){
+      let res=await _dbxDownload(token);
+      if(res.status===401){ token=await _dbxRefresh(); if(token) res=await _dbxDownload(token); }
+      if(res.ok){
+        const remote=JSON.parse(await res.text());
+        if(remote && remote.savedAt && remote.savedAt>localSavedAt()){
+          // 원격이 더 최신 → 채택
+          records=Array.isArray(remote.records)?remote.records.filter(x=>typeof x==='number'):records;
+          if(remote.settings) settings=Object.assign(settings,remote.settings);
+          saveRecords(); saveSettingsRaw();
+          localStorage.setItem(TKEY, remote.savedAt);
+          applyTheme(); render();
+          toast('Dropbox에서 최신 데이터를 불러왔어요',{type:'success'});
+          _syncing=false; return;
+        }
+      }
+    }
+    // 로컬 업로드
+    const payload={records, settings, savedAt:localSavedAt()};
+    let up=await _dbxUpload(token, payload);
+    if(up.status===401){ token=await _dbxRefresh(); if(token) up=await _dbxUpload(token, payload); }
+  }catch(e){}
+  _syncing=false;
+}
+
+// ── 자정 넘김 자동 갱신 ──
+setInterval(render,60000);
+
+// ── 서비스워커 ──
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+
+// ── 시작 ──
+applyTheme();
+render();
+updateDbxLabel();
+dbxHandleCallback().then(()=>{ if(dbxGetToken()) syncDropbox(); });
+</script>
+</body>
+</html>

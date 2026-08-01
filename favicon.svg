@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 담배 -->
+  <g>
+    <!-- 몸통 -->
+    <rect x="150" y="298" width="168" height="46" rx="5" fill="#1b1b1f"/>
+    <!-- 불붙은 끝(밴드) -->
+    <rect x="318" y="298" width="16" height="46" fill="#e0232b"/>
+    <rect x="336" y="298" width="10" height="46" fill="#ff7a3c"/>
+    <rect x="348" y="298" width="12" height="46" rx="2" fill="#ffcf8a"/>
+    <!-- 연기 -->
+    <path d="M300 292 C 300 256, 262 252, 262 216 C 262 184, 300 182, 300 150"
+          fill="none" stroke="#1b1b1f" stroke-width="22" stroke-linecap="round"/>
+    <path d="M348 288 C 348 258, 384 256, 384 226"
+          fill="none" stroke="#e0232b" stroke-width="20" stroke-linecap="round"/>
+  </g>
+  <!-- 금지 원 + 사선 -->
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#e0232b" stroke-width="34"/>
+  <line x1="126" y1="126" x2="386" y2="386" stroke="#e0232b" stroke-width="34" stroke-linecap="round"/>
+</svg>
