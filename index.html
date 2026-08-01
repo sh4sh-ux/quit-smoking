@@ -246,7 +246,42 @@
   .bar.over{background:linear-gradient(180deg,#ff8a7a,var(--danger));}
   .appver{text-align:center; font-size:11px; color:var(--dim); margin-top:26px; opacity:.7; user-select:none;}
   .hcol{cursor:pointer;}
-  .hourhint{font-size:11px; color:var(--dim); text-align:center; margin-top:10px;}
+  .hourhint{font-size:11px; color:var(--dim); text-align:center; margin-top:12px;}
+  /* 흡연 패턴 카드 */
+  .chead{display:flex; flex-direction:column; gap:13px; margin-bottom:16px;}
+  .eyebrow{font-size:11px; font-weight:800; color:var(--accent); letter-spacing:.06em; margin-bottom:6px;}
+  .ctitle{font-size:17px; font-weight:800; letter-spacing:-.3px; margin:0; line-height:1.35;}
+  .seg{display:flex; gap:2px; background:var(--card2); border:1px solid var(--line); border-radius:11px;
+    padding:3px; flex-shrink:0; width:100%;}
+  .seg button{flex:1; border:none; background:transparent; color:var(--sub); font-size:12.5px; font-weight:700;
+    padding:8px 6px; border-radius:9px; cursor:pointer; white-space:nowrap;}
+  .seg button.on{background:var(--text); color:var(--card);}
+  .sumrow{display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .sumrow .s{padding:13px 4px;}
+  .sumrow .s+.s{border-left:1px solid var(--line); padding-left:14px;}
+  .sumrow .k{font-size:11px; color:var(--dim); font-weight:600; margin-bottom:5px;}
+  .sumrow .v{font-size:19px; font-weight:800; letter-spacing:-.5px; font-variant-numeric:tabular-nums;}
+  .chart{display:flex; align-items:flex-end; gap:5px; height:170px; margin-top:18px;}
+  .chart .col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    height:100%; gap:5px; cursor:pointer; min-width:0;}
+  .chart .val{font-size:10px; font-weight:800; color:var(--sub); min-height:13px; font-variant-numeric:tabular-nums;}
+  .chart .cbar{width:100%; background:var(--track); border-radius:7px; transition:height .25s,background .15s;}
+  .chart .col.hot .cbar{background:linear-gradient(180deg,var(--accent),var(--accent-d));}
+  .chart .lbl{font-size:9.5px; color:var(--dim); margin-top:6px; white-space:nowrap;}
+  .chart .col.hot .lbl{color:var(--accent); font-weight:800;}
+  /* 최근 기록 */
+  .rhead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .pill{background:var(--card2); border:1px solid var(--line); color:var(--sub); font-size:11.5px; font-weight:700;
+    padding:7px 12px; border-radius:999px; white-space:nowrap;}
+  .rlist{border-top:1px solid var(--line);}
+  .ritem{display:flex; align-items:center; gap:12px; padding:13px 2px; border-bottom:1px solid var(--line);}
+  .ritem .no{font-size:12px; font-weight:800; color:var(--accent); width:22px; flex-shrink:0; font-variant-numeric:tabular-nums;}
+  .ritem .mid{flex:1; min-width:0;}
+  .ritem .t{font-size:14px; font-weight:700;}
+  .ritem .ago{font-size:11.5px; color:var(--dim); margin-top:2px;}
+  .ritem .amt{font-size:14px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .more{width:100%; margin-top:12px; background:var(--card2); border:1px solid var(--line); color:var(--sub);
+    border-radius:13px; padding:12px; font-size:13px; font-weight:700; cursor:pointer;}
   .tlist .row{display:flex; align-items:center; justify-content:space-between; padding:13px 6px; border-bottom:1px solid var(--line); font-size:14px;}
   .tlist .row:last-child{border-bottom:none;}
   .tlist .row .d{color:var(--sub); font-size:13px;}
@@ -276,7 +311,7 @@
     <div class="brand">
       <span class="logo" role="img" aria-label="줄담배 아이콘"></span>
       <div>
-        <h1>줄담배 <span class="ver">v1.11</span></h1>
+        <h1>줄담배 <span class="ver">v1.12</span></h1>
         <div class="sub">천천히, 하나씩 줄이기</div>
       </div>
     </div>
@@ -328,18 +363,39 @@
     </div></div>
   </div>
 
-  <div class="section-title" id="dailyTitle">📈 최근 7일 추이</div>
-  <div class="card"><div class="bars" id="dailyBars"></div></div>
-
-  <div class="section-title">🕒 시간대별 패턴</div>
   <div class="card">
-    <div class="hours" id="hourBars"></div>
-    <div class="hlabels"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>23시</span></div>
-    <div class="hourhint">막대를 탭하면 그 시간대에 정확히 몇 시 몇 분에 피웠는지 볼 수 있어요</div>
+    <div class="chead">
+      <div>
+        <div class="eyebrow">흡연 패턴</div>
+        <h2 class="ctitle">언제 가장 많이 피우는지 보여요</h2>
+      </div>
+      <div class="seg" id="patSeg">
+        <button data-g="month">월</button>
+        <button data-g="week">주</button>
+        <button class="on" data-g="day">일</button>
+        <button data-g="hour">시간</button>
+      </div>
+    </div>
+    <div class="sumrow">
+      <div class="s"><div class="k">선택 구간</div><div class="v" id="pSel">—</div></div>
+      <div class="s"><div class="k">지출 금액</div><div class="v" id="pSpend">—</div></div>
+      <div class="s"><div class="k">누적 지출</div><div class="v" id="pTotal">—</div></div>
+    </div>
+    <div class="chart" id="patChart"></div>
+    <div class="hourhint">막대를 탭하면 그 구간의 기록을 볼 수 있어요</div>
   </div>
 
-  <div class="section-title">📅 요일별 패턴</div>
-  <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
+  <div class="card">
+    <div class="rhead">
+      <div>
+        <div class="eyebrow">최근 기록</div>
+        <h2 class="ctitle">방금 전부터 차곡차곡</h2>
+      </div>
+      <span class="pill" id="rPill">—</span>
+    </div>
+    <div class="rlist" id="rlist"></div>
+    <button class="more" onclick="openAllRecords()">전체 기록 보기</button>
+  </div>
   </div>
 </div>
 
@@ -594,44 +650,101 @@ function render(){
   document.getElementById('mTotal').textContent=won(total*pc);
 
   document.getElementById('goalSub').textContent = goal!==null? `${goal}개/일` : '미설정';
-  document.getElementById('dailyTitle').textContent = goal!==null? `📈 최근 7일 추이 · 목표 ${goal}` : '📈 최근 7일 추이';
 
-  renderDaily(sorted, todayStart);
-  renderHours(sorted);
-  renderWeekdays(sorted);
+  renderPattern(sorted);
+  renderRecent(sorted);
   document.getElementById('priceSub').textContent=won(pc)+'/개비';
 }
 
-function renderDaily(sorted, todayStart){
-  const box=document.getElementById('dailyBars'); const days=[];
-  for(let i=6;i>=0;i--){
-    const s=todayStart-i*86400000;
-    days.push({count:countOnDay(sorted,s), goal:goalFor(s), label:['일','월','화','수','목','금','토'][new Date(s).getDay()], isToday:i===0});
+/* ── 흡연 패턴 (월/주/일/시간 구간 전환) ── */
+let patG='day', patSel=null;
+const WDN=['일','월','화','수','목','금','토'];
+
+function patBuckets(sorted){
+  const out=[], now=Date.now(), D=86400000, today=startOfDay(now);
+  let i,s,e;
+  if(patG==='day'){
+    for(i=13;i>=0;i--){ s=today-i*D;
+      out.push({s:s,e:s+D,lbl:i===0?'오늘':WDN[new Date(s).getDay()],cnt:countOnDay(sorted,s)}); }
+  } else if(patG==='week'){
+    const thisW=today-((new Date(now).getDay()+6)%7)*D;
+    for(i=11;i>=0;i--){ s=thisW-i*7*D; e=s+7*D;
+      out.push({s:s,e:e,lbl:i===0?'이번주':(new Date(s).getMonth()+1)+'/'+new Date(s).getDate(),
+        cnt:sorted.filter(t=>t>=s&&t<e).length}); }
+  } else if(patG==='month'){
+    const d0=new Date(now);
+    for(i=11;i>=0;i--){
+      const ms=new Date(d0.getFullYear(),d0.getMonth()-i,1).getTime();
+      const me=new Date(d0.getFullYear(),d0.getMonth()-i+1,1).getTime();
+      out.push({s:ms,e:me,lbl:(new Date(ms).getMonth()+1)+'월',cnt:sorted.filter(t=>t>=ms&&t<me).length});
+    }
+  } else { // hour
+    const b=new Array(24).fill(0); sorted.forEach(t=>b[new Date(t).getHours()]++);
+    for(i=0;i<24;i++) out.push({hour:i,lbl:(i%3===0?String(i):''),cnt:b[i]});
   }
-  const max=Math.max(1,...days.map(d=>d.count));
-  box.innerHTML=days.map(d=>{
-    const h=d.count? Math.max(6,(d.count/max)*118):4;
-    const over=d.goal!==null && d.count>d.goal;
-    const cls=over?'over':(d.isToday?'today-bar':'');
-    return `<div class="bar-col ${d.isToday?'is-today':''}"><div class="bar-val">${d.count||''}</div><div class="bar ${cls}" style="height:${h}px"></div><div class="bar-lbl">${d.label}</div></div>`;
-  }).join('');
+  return out;
 }
-function renderHours(sorted){
-  const box=document.getElementById('hourBars');
+function renderPattern(sorted){
+  const bs=patBuckets(sorted), pc=perCig();
+  if(patSel===null||patSel>=bs.length){
+    patSel=bs.length-1;
+    if(patG==='hour'){ let mx=-1; bs.forEach((b,i)=>{ if(b.cnt>mx){mx=b.cnt; patSel=i;} }); }
+  }
+  const max=Math.max(1,...bs.map(b=>b.cnt));
+  document.getElementById('patChart').innerHTML=bs.map((b,i)=>{
+    const h=b.cnt? Math.max(10,(b.cnt/max)*136):8;
+    let lbl=b.lbl;
+    if(i===patSel && !lbl && patG==='hour') lbl=b.hour+'시';
+    return `<div class="col${i===patSel?' hot':''}" data-i="${i}">
+      <div class="val">${i===patSel&&b.cnt?b.cnt:''}</div>
+      <div class="cbar" style="height:${h}px"></div>
+      <div class="lbl">${lbl}</div></div>`;
+  }).join('');
+  document.querySelectorAll('#patChart .col').forEach(el=>{
+    el.addEventListener('click',()=>{ patSel=+el.dataset.i; renderPattern([...records].sort((a,b)=>a-b)); });
+  });
+  const b=bs[patSel];
+  document.getElementById('pSel').textContent=b.cnt+'개비';
+  document.getElementById('pSpend').textContent=won(b.cnt*pc);
+  document.getElementById('pTotal').textContent=won(sorted.length*pc);
+}
+document.getElementById('patSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#patSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); patG=b.dataset.g; patSel=null;
+  renderPattern([...records].sort((a,b)=>a-b));
+});
+
+/* ── 최근 기록 ── */
+function fmtRecord(ts){
+  const d=new Date(ts), wd=WDN[d.getDay()];
+  const hh=String(d.getHours()).padStart(2,'0'), mm=String(d.getMinutes()).padStart(2,'0');
+  return {date:`${d.getMonth()+1}월 ${d.getDate()}일 (${wd}) ${hh}:${mm}`, ago:fmtGap(Date.now()-ts)};
+}
+function renderRecent(sorted){
+  const pc=perCig();
+  document.getElementById('rPill').textContent=sorted.length.toLocaleString('ko-KR')+'개비 누적';
+  const box=document.getElementById('rlist');
   if(!sorted.length){ box.innerHTML=`<div class="empty">아직 기록이 없어요</div>`; return; }
-  const b=new Array(24).fill(0); sorted.forEach(t=>b[new Date(t).getHours()]++);
-  const max=Math.max(1,...b);
-  box.innerHTML=b.map((c,i)=>{
-    const h=c?Math.max(3,(c/max)*84):2, op=c?(0.4+0.6*(c/max)):0.12;
-    return `<div class="hcol" onclick="openHourDetail(${i})"><div class="hbar" style="height:${h}px; opacity:${op}"></div></div>`;
+  box.innerHTML=sorted.slice(-5).reverse().map((t,i)=>{
+    const f=fmtRecord(t);
+    return `<div class="ritem"><span class="no">${String(i+1).padStart(2,'0')}</span>
+      <div class="mid"><div class="t">${f.date}</div><div class="ago">${f.ago}</div></div>
+      <span class="amt">${won(pc)}</span></div>`;
   }).join('');
 }
-function renderWeekdays(sorted){
-  const box=document.getElementById('weekdayRows');
-  const names=['일','월','화','수','목','금','토'], c=new Array(7).fill(0);
-  sorted.forEach(t=>c[new Date(t).getDay()]++);
-  const max=Math.max(1,...c);
-  box.innerHTML=names.map((n,i)=>`<div class="wd-row"><div class="wd-name">${n}</div><div class="wd-track"><div class="wd-fill" style="width:${(c[i]/max)*100}%"></div></div><div class="wd-num">${c[i]}</div></div>`).join('');
+function openAllRecords(){
+  const sorted=[...records].sort((a,b)=>a-b), pc=perCig();
+  document.getElementById('hourTitle').textContent=`🕒 전체 기록 · ${sorted.length}개비`;
+  const body=document.getElementById('hourBody');
+  if(!sorted.length) body.innerHTML=`<div class="empty">아직 기록이 없어요</div>`;
+  else body.innerHTML=`<div class="rlist">`+sorted.slice().reverse().map((t,i)=>{
+    const f=fmtRecord(t);
+    return `<div class="ritem"><span class="no">${String(i+1).padStart(2,'0')}</span>
+      <div class="mid"><div class="t">${f.date}</div><div class="ago">${f.ago}</div></div>
+      <span class="amt">${won(pc)}</span></div>`;
+  }).join('')+`</div>`;
+  showSheet('hourSheet');
 }
 
 // ── 테마 ──
@@ -679,23 +792,6 @@ function showSheet(id){
 function closeSheets(keepOverlay){
   ['menuSheet','settingsSheet','goalSheet','hourSheet','dbxSheet'].forEach(i=>document.getElementById(i).classList.remove('show'));
   if(!keepOverlay) document.getElementById('overlay').classList.remove('show');
-}
-
-// ── 시간대 상세 (정확한 시각) ──
-function hourLabel(h){ const ap=h<12?'오전':'오후'; let hh=h%12; if(hh===0)hh=12; return `${ap} ${hh}시`; }
-function fmtDateTime(ts){
-  const d=new Date(ts), wd=['일','월','화','수','목','금','토'][d.getDay()];
-  let h=d.getHours(); const mm=String(d.getMinutes()).padStart(2,'0');
-  const ap=h<12?'오전':'오후'; let hh=h%12; if(hh===0)hh=12;
-  return {date:`${d.getMonth()+1}월 ${d.getDate()}일 (${wd})`, time:`${ap} ${hh}:${mm}`};
-}
-function openHourDetail(h){
-  const items=records.filter(t=>new Date(t).getHours()===h).sort((a,b)=>b-a);
-  document.getElementById('hourTitle').textContent=`🕒 ${hourLabel(h)}대 · ${items.length}회`;
-  const body=document.getElementById('hourBody');
-  if(!items.length) body.innerHTML=`<div class="empty">이 시간대에 기록이 없어요</div>`;
-  else body.innerHTML=`<div class="tlist">`+items.map(t=>{const f=fmtDateTime(t);return `<div class="row"><span class="d">${f.date}</span><span class="t">${f.time}</span></div>`;}).join('')+`</div>`;
-  showSheet('hourSheet');
 }
 
 // ── 목표 설정 ──
