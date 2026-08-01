@@ -73,6 +73,7 @@
   .brand{display:flex; align-items:center; gap:9px;}
   .brand .logo{font-size:24px;}
   .brand h1{font-size:19px; font-weight:800; margin:0; letter-spacing:-.3px;}
+  .brand h1 .ver{font-size:11px; font-weight:600; color:var(--dim); letter-spacing:0; margin-left:3px;}
   .brand .sub{font-size:12px; color:var(--dim); margin-top:1px;}
   .hbtns{display:flex; gap:8px;}
   .icon-btn{background:var(--card); border:1px solid var(--line); color:var(--sub);
@@ -269,7 +270,7 @@
     <div class="brand">
       <span class="logo">🚭</span>
       <div>
-        <h1>줄담배</h1>
+        <h1>줄담배 <span class="ver">v1.8</span></h1>
         <div class="sub">천천히, 하나씩 줄이기</div>
       </div>
     </div>
@@ -303,7 +304,6 @@
   </div>
 
   <button class="logbtn" onclick="logOne()"><span class="ic">🚬</span> 한 대 피웠어요</button>
-  <div class="btnrow"><button class="resistbtn" onclick="resistOne()">💪 참았어요</button></div>
   <button class="undo" id="undoBtn" onclick="undoLast()" disabled>방금 기록 취소</button>
   </div>
 
@@ -315,22 +315,12 @@
       <div class="cell"><div class="n" id="st7">0</div><div class="l">최근 7일</div></div>
       <div class="cell"><div class="n" id="stTotal">0</div><div class="l">전체 누적</div></div>
     </div></div>
-    <div class="mrow"><div class="mh">💪 참기 · 스트릭</div><div class="cells">
-      <div class="cell"><div class="n" id="stResistToday">0</div><div class="l">오늘 참음</div></div>
-      <div class="cell"><div class="n" id="stResistTotal">0</div><div class="l">누적 참음</div></div>
-      <div class="cell"><div class="n" id="stStreak">0</div><div class="l">목표 연속일</div></div>
-    </div></div>
-    <div class="mrow"><div class="mh">💰 지출 · 절약</div><div class="cells">
+    <div class="mrow"><div class="mh">💰 지출 · 목표</div><div class="cells">
       <div class="cell"><div class="n spend" id="mToday">0원</div><div class="l">오늘 지출</div></div>
       <div class="cell"><div class="n spend" id="mTotal">0원</div><div class="l">누적 지출</div></div>
-      <div class="cell"><div class="n save spend" id="savedMoney">—</div><div class="l">아낀 돈</div></div>
-    </div>
-    <div class="subhint" id="savedHint"></div>
-    </div>
+      <div class="cell"><div class="n" id="stStreak">0</div><div class="l">목표 연속일</div></div>
+    </div></div>
   </div>
-
-  <div class="section-title">🏅 성취</div>
-  <div class="card"><div class="badges" id="badges"></div></div>
 
   <div class="section-title" id="dailyTitle">📈 최근 7일 추이</div>
   <div class="card"><div class="bars" id="dailyBars"></div></div>
@@ -344,8 +334,6 @@
 
   <div class="section-title">📅 요일별 패턴</div>
   <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
-
-  <div class="appver">줄담배 v1.7 · 2026-08-01</div>
   </div>
 </div>
 
@@ -401,11 +389,6 @@
   <div class="field">
     <label>최소 흡연 간격 (분, 0 = 미사용)</label>
     <input type="number" id="inInterval" inputmode="numeric" placeholder="예: 90">
-  </div>
-  <div class="field">
-    <label>기준 흡연량 (하루 개비 · 절약 계산용, 0 = 미사용)</label>
-    <input type="number" id="inBaseline" inputmode="numeric" placeholder="예: 20">
-    <div class="hint">앱 쓰기 전 하루 평균. 이보다 덜 피운 만큼 "아낀 담배·돈"으로 계산돼요.</div>
   </div>
   <button class="primary-btn" onclick="saveGoalSettings()">저장</button>
 </div>
@@ -599,26 +582,10 @@ function render(){
     document.getElementById('stAvg').textContent=(avg>=10?Math.round(avg):avg.toFixed(1));
   } else document.getElementById('stAvg').textContent='0';
 
-  // 참기 · 스트릭
-  document.getElementById('stResistToday').textContent=countOnDay(resisted,todayStart);
-  document.getElementById('stResistTotal').textContent=resisted.length;
-  const streak=streakDays(sorted);
-  document.getElementById('stStreak').textContent=streak;
-
-  // 지출 · 절약
+  // 스트릭 + 지출
+  document.getElementById('stStreak').textContent=streakDays(sorted);
   document.getElementById('mToday').textContent=won(todayCount*pc);
   document.getElementById('mTotal').textContent=won(total*pc);
-  const sv=savings(sorted);
-  const savedEl=document.getElementById('savedMoney'), savedHint=document.getElementById('savedHint');
-  if(sv.on){
-    savedEl.textContent=won(sv.money);
-    savedHint.textContent=`기준 ${settings.baseline}개비/일 대비 안 핀 담배 ${Math.round(sv.cigs)}개비 (오늘 ${sv.todayCigs}개비)`;
-  } else {
-    savedEl.textContent='—';
-    savedHint.innerHTML=`<span onclick="openGoalSettings()" style="cursor:pointer;text-decoration:underline">기준 흡연량을 설정하면 아낀 돈이 계산돼요</span>`;
-  }
-
-  renderBadges(sv, streak);
 
   document.getElementById('goalSub').textContent = goal!==null? `${goal}개/일` : '미설정';
   document.getElementById('dailyTitle').textContent = goal!==null? `📈 최근 7일 추이 · 목표 ${goal}` : '📈 최근 7일 추이';
@@ -627,19 +594,6 @@ function render(){
   renderHours(sorted);
   renderWeekdays(sorted);
   document.getElementById('priceSub').textContent=won(pc)+'/개비';
-}
-
-function renderBadges(sv, streak){
-  const defs=[
-    {e:'💪', t:'첫 참기', on: resisted.length>=1},
-    {e:'🔥', t:'연속 3일', on: streak>=3},
-    {e:'🏆', t:'연속 7일', on: streak>=7},
-    {e:'🚭', t:'참기 20회', on: resisted.length>=20},
-    {e:'💵', t:'1만원 절약', on: sv.on && sv.money>=10000},
-    {e:'🌿', t:'100개비 절약', on: sv.on && sv.cigs>=100},
-  ];
-  document.getElementById('badges').innerHTML=defs.map(b=>
-    `<div class="badge ${b.on?'on':''}"><span class="be">${b.e}</span>${b.t}${b.on?'':' 🔒'}</div>`).join('');
 }
 
 function renderDaily(sorted, todayStart){
@@ -746,7 +700,6 @@ function openGoalSettings(){
   document.getElementById('inEvery').value=s.goalReduceEvery||14;
   document.getElementById('inFloor').value=s.goalFloor||0;
   document.getElementById('inInterval').value=s.minInterval||'';
-  document.getElementById('inBaseline').value=s.baseline||'';
   updateGoalPlanHint();
   showSheet('goalSheet');
 }
@@ -771,11 +724,10 @@ function saveGoalSettings(){
   const every=Math.max(1,parseInt(document.getElementById('inEvery').value)||14);
   const floor=Math.max(0,parseInt(document.getElementById('inFloor').value)||0);
   const mi=Math.max(0,parseInt(document.getElementById('inInterval').value)||0);
-  const base=Math.max(0,parseInt(document.getElementById('inBaseline').value)||0);
   if(g>0){ if(!settings.goalStartDate) settings.goalStartDate=new Date().toISOString(); }
   else settings.goalStartDate=null;
   settings.dailyGoal=g; settings.goalAutoReduce=auto; settings.goalReduceEvery=every;
-  settings.goalFloor=floor; settings.minInterval=mi; settings.baseline=base;
+  settings.goalFloor=floor; settings.minInterval=mi;
   saveSettingsRaw(); bump(); render(); closeSheets(); toast('저장했어요',{type:'success'});
 }
 document.getElementById('inCigs').addEventListener('input',updatePerCigHint);
