@@ -1,10 +1,10 @@
 // 줄담배 서비스워커 — 앱 셸 캐시
-const CACHE = 'quit-smoking-v1';
+const CACHE = 'quit-smoking-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './favicon.svg',
+  './favicon.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
