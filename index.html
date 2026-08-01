@@ -15,9 +15,9 @@
   :root{
     color-scheme:light dark;
     /* ── 라이트 (기본) ── */
-    --bg:#f5f6f8; --card:#ffffff; --card2:#f7f8fa;
-    --line:#e7e9ef; --line2:#d9dce4;
-    --text:#16181d; --sub:#5b6472; --dim:#9aa2b1;
+    --bg:#f5f6f8; --card:#ffffff; --card2:#f4f5f7;
+    --line:#e9ebf0; --line2:#dcdfe6;
+    --text:#17181c; --sub:#6b7280; --dim:#a5abb6;
     --accent:#ff6a3d; --accent-d:#ff5423;
     --good:#12a15b; --danger:#e5484d;
     --money:#c76a00; --money-bg:rgba(255,150,40,.10);
@@ -29,11 +29,11 @@
     --sheet-bg:#ffffff;
   }
   :root[data-theme="dark"]{
-    --bg:#0f1420; --card:#1b2437; --card2:#212c44;
-    --line:#2a3550; --line2:#38456a;
-    --text:#eef2fb; --sub:#93a0bd; --dim:#66739a;
+    --bg:#0f1420; --card:#1b2333; --card2:#212a3d;
+    --line:#2a3448; --line2:#38445c;
+    --text:#eef1f7; --sub:#8b93a4; --dim:#5f6a80;
     --accent:#ff7a59; --accent-d:#ff5c3c;
-    --good:#4ecb8d; --danger:#ff5c6c;
+    --good:#4ecb8d; --danger:#ff6b76;
     --money:#ffb457; --money-bg:rgba(255,180,87,.10);
     --shadow:0 10px 30px rgba(0,0,0,.35);
     --btn-shadow:0 12px 28px rgba(255,92,60,.35);
@@ -44,11 +44,11 @@
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
-      --bg:#0f1420; --card:#1b2437; --card2:#212c44;
-      --line:#2a3550; --line2:#38456a;
-      --text:#eef2fb; --sub:#93a0bd; --dim:#66739a;
+      --bg:#0f1420; --card:#1b2333; --card2:#212a3d;
+      --line:#2a3448; --line2:#38445c;
+      --text:#eef1f7; --sub:#8b93a4; --dim:#5f6a80;
       --accent:#ff7a59; --accent-d:#ff5c3c;
-      --good:#4ecb8d; --danger:#ff5c6c;
+      --good:#4ecb8d; --danger:#ff6b76;
       --money:#ffb457; --money-bg:rgba(255,180,87,.10);
       --shadow:0 10px 30px rgba(0,0,0,.35);
       --btn-shadow:0 12px 28px rgba(255,92,60,.35);
@@ -87,8 +87,8 @@
   .today-label{font-size:13px; color:var(--sub); font-weight:600; margin-bottom:6px;}
   .today-count{font-size:54px; font-weight:800; line-height:1; letter-spacing:-2px;}
   .today-count small{font-size:19px; font-weight:600; color:var(--sub); margin-left:4px; letter-spacing:0;}
-  .today-money{display:inline-block; margin-top:12px; font-size:14px; font-weight:700; color:var(--money);
-    background:var(--money-bg); padding:5px 11px; border-radius:9px;}
+  .today-money{display:inline-block; margin-top:12px; font-size:14px; font-weight:700; color:var(--sub);
+    background:var(--card2); border:1px solid var(--line); padding:5px 11px; border-radius:9px;}
   .today-vs{text-align:right; font-size:12px; color:var(--sub); line-height:1.5;}
   .today-vs b{display:block; font-size:15px; font-weight:700;}
   .up{color:var(--danger);} .down{color:var(--good);}
@@ -130,11 +130,11 @@
   .bars{display:flex; align-items:flex-end; gap:8px; height:150px; padding-top:6px;}
   .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px;}
   .bar-val{font-size:11px; color:var(--sub); font-weight:700; min-height:14px;}
-  .bar{width:100%; max-width:34px; background:linear-gradient(180deg,var(--bar-top),var(--bar-bot));
+  .bar{width:100%; max-width:34px; background:linear-gradient(180deg,#ffb18f,var(--accent));
     border-radius:8px 8px 4px 4px; min-height:4px; transition:height .3s ease;}
-  .bar.today-bar{background:linear-gradient(180deg,var(--tbar-top),var(--tbar-bot));}
+  .bar.today-bar{background:linear-gradient(180deg,var(--accent),var(--accent-d));}
   .bar-lbl{font-size:10px; color:var(--dim); margin-top:7px;}
-  .bar-col.is-today .bar-lbl{color:var(--tbar-txt); font-weight:700;}
+  .bar-col.is-today .bar-lbl{color:var(--accent); font-weight:700;}
 
   .hours{display:flex; gap:3px; align-items:flex-end; height:90px;}
   .hcol{flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%;}
@@ -145,7 +145,7 @@
   .wd-row{display:flex; align-items:center; gap:10px;}
   .wd-name{width:22px; font-size:13px; color:var(--sub); font-weight:600; flex-shrink:0;}
   .wd-track{flex:1; background:var(--track); border-radius:8px; height:22px; overflow:hidden;}
-  .wd-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--bar-top)); border-radius:8px; min-width:2px; transition:width .3s;}
+  .wd-fill{height:100%; background:linear-gradient(90deg,var(--accent),#ffb18f); border-radius:8px; min-width:2px; transition:width .3s;}
   .wd-num{width:26px; text-align:right; font-size:13px; font-weight:700; color:var(--sub); flex-shrink:0;}
 
   .empty{text-align:center; color:var(--dim); font-size:13px; padding:20px 10px; line-height:1.6; width:100%;}
@@ -212,18 +212,18 @@
   .interval.ok .it{color:var(--good);}
   /* 참았어요 버튼 */
   .btnrow{display:flex; gap:10px; margin-bottom:11px;}
-  .resistbtn{flex:1; border:none; cursor:pointer; color:#fff;
-    background:linear-gradient(145deg,var(--good),#0b8f4d);
-    border-radius:18px; padding:18px; font-size:16px; font-weight:800;
+  .resistbtn{flex:1; cursor:pointer; color:var(--text);
+    background:var(--card); border:1.5px solid var(--line2);
+    border-radius:18px; padding:17px; font-size:16px; font-weight:800;
     display:flex; align-items:center; justify-content:center; gap:8px;
-    box-shadow:0 10px 22px rgba(18,161,91,.30); transition:transform .08s;}
+    box-shadow:var(--shadow); transition:transform .08s;}
   .resistbtn:active{transform:scale(.97);}
   /* 성취 배지 */
   .badges{display:flex; flex-wrap:wrap; gap:8px;}
   .badge{display:flex; align-items:center; gap:7px; background:var(--card2); border:1px solid var(--line);
     border-radius:12px; padding:9px 12px; font-size:12.5px; font-weight:600; color:var(--dim);}
   .badge .be{font-size:16px; filter:grayscale(1); opacity:.5;}
-  .badge.on{color:var(--text); border-color:var(--accent); background:var(--money-bg);}
+  .badge.on{color:var(--text); border-color:var(--accent); background:rgba(255,106,61,.08);}
   .badge.on .be{filter:none; opacity:1;}
   /* 토글 스위치 */
   .toggle-row{display:flex; align-items:center; justify-content:space-between; margin:2px 2px 14px;}
@@ -258,7 +258,7 @@
   .mrow .mh{font-size:12px; color:var(--sub); font-weight:700; margin-bottom:11px; display:flex; align-items:center; gap:6px;}
   .mrow .cells{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center;}
   .mrow .cell .n{font-size:22px; font-weight:800; letter-spacing:-1px;}
-  .mrow .cell .n.g{color:var(--good);} .mrow .cell .n.m{color:var(--money); font-size:18px;}
+  .mrow .cell .n.save{color:var(--good);} .mrow .cell .n.spend{font-size:18px;}
   .mrow .cell .l{font-size:11px; color:var(--dim); margin-top:3px;}
   .mrow .subhint{font-size:11.5px; color:var(--dim); text-align:center; margin-top:10px;}
 </style>
@@ -316,14 +316,14 @@
       <div class="cell"><div class="n" id="stTotal">0</div><div class="l">전체 누적</div></div>
     </div></div>
     <div class="mrow"><div class="mh">💪 참기 · 스트릭</div><div class="cells">
-      <div class="cell"><div class="n g" id="stResistToday">0</div><div class="l">오늘 참음</div></div>
-      <div class="cell"><div class="n g" id="stResistTotal">0</div><div class="l">누적 참음</div></div>
+      <div class="cell"><div class="n" id="stResistToday">0</div><div class="l">오늘 참음</div></div>
+      <div class="cell"><div class="n" id="stResistTotal">0</div><div class="l">누적 참음</div></div>
       <div class="cell"><div class="n" id="stStreak">0</div><div class="l">목표 연속일</div></div>
     </div></div>
     <div class="mrow"><div class="mh">💰 지출 · 절약</div><div class="cells">
-      <div class="cell"><div class="n m" id="mToday">0원</div><div class="l">오늘 지출</div></div>
-      <div class="cell"><div class="n m" id="mTotal">0원</div><div class="l">누적 지출</div></div>
-      <div class="cell"><div class="n g" id="savedMoney">—</div><div class="l">아낀 돈</div></div>
+      <div class="cell"><div class="n spend" id="mToday">0원</div><div class="l">오늘 지출</div></div>
+      <div class="cell"><div class="n spend" id="mTotal">0원</div><div class="l">누적 지출</div></div>
+      <div class="cell"><div class="n save spend" id="savedMoney">—</div><div class="l">아낀 돈</div></div>
     </div>
     <div class="subhint" id="savedHint"></div>
     </div>
@@ -345,7 +345,7 @@
   <div class="section-title">📅 요일별 패턴</div>
   <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
 
-  <div class="appver">줄담배 v1.6 · 2026-08-01</div>
+  <div class="appver">줄담배 v1.7 · 2026-08-01</div>
   </div>
 </div>
 
@@ -558,11 +558,11 @@ function render(){
   if(goal!==null){
     const remain=goal-todayCount, over=remain<0;
     const pctFill=goal>0? Math.min(100,(todayCount/goal)*100) : 100;
-    const color=over?'var(--danger)':'var(--good)';
+    const color=over?'var(--danger)':'var(--sub)';
     const rtxt=over?`초과 ${-remain}개`:`남은 ${remain}개`;
     goalArea.innerHTML=`<div class="goalbar-wrap">
       <div class="goalbar-top"><span class="gl">오늘 목표 ${goal}개</span><span class="gr" style="color:${color}">${rtxt}</span></div>
-      <div class="goalbar"><div class="fill" style="width:${pctFill}%; background:${over?'var(--danger)':'linear-gradient(90deg,var(--good),#3ad07f)'}"></div></div>
+      <div class="goalbar"><div class="fill" style="width:${pctFill}%; background:${over?'var(--danger)':'linear-gradient(90deg,var(--accent),var(--accent-d))'}"></div></div>
     </div>`;
   } else {
     goalArea.innerHTML=`<div class="goal-set-hint" onclick="openGoalSettings()">🎯 하루 목표를 정하고 줄여보세요 · 목표 설정</div>`;
