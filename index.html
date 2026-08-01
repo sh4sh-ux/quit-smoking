@@ -244,6 +244,23 @@
   .tlist .row:last-child{border-bottom:none;}
   .tlist .row .d{color:var(--sub); font-size:13px;}
   .tlist .row .t{font-weight:700;}
+  /* 탭 */
+  .tabbar{display:flex; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:15px;
+    padding:5px; margin-bottom:16px; box-shadow:var(--shadow); position:sticky; top:8px; z-index:20;}
+  .tabbar button{flex:1; border:none; background:transparent; color:var(--sub); font-size:14px; font-weight:700;
+    padding:11px; border-radius:11px; cursor:pointer; transition:.15s;}
+  .tabbar button.on{background:var(--accent); color:#fff;}
+  .panel{display:none;} .panel.on{display:block;}
+  /* 통합 지표 카드 */
+  .metrics{background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden;}
+  .metrics .mrow{padding:15px 16px;}
+  .metrics .mrow+.mrow{border-top:1px solid var(--line);}
+  .mrow .mh{font-size:12px; color:var(--sub); font-weight:700; margin-bottom:11px; display:flex; align-items:center; gap:6px;}
+  .mrow .cells{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center;}
+  .mrow .cell .n{font-size:22px; font-weight:800; letter-spacing:-1px;}
+  .mrow .cell .n.g{color:var(--good);} .mrow .cell .n.m{color:var(--money); font-size:18px;}
+  .mrow .cell .l{font-size:11px; color:var(--dim); margin-top:3px;}
+  .mrow .subhint{font-size:11.5px; color:var(--dim); text-align:center; margin-top:10px;}
 </style>
 </head>
 <body>
@@ -262,6 +279,12 @@
     </div>
   </header>
 
+  <div class="tabbar">
+    <button class="on" id="tabToday" onclick="showTab('today')">오늘</button>
+    <button id="tabStats" onclick="showTab('stats')">통계</button>
+  </div>
+
+  <div class="panel on" id="panelToday">
   <div class="today">
     <div class="today-top">
       <div>
@@ -282,28 +305,29 @@
   <button class="logbtn" onclick="logOne()"><span class="ic">🚬</span> 한 대 피웠어요</button>
   <div class="btnrow"><button class="resistbtn" onclick="resistOne()">💪 참았어요</button></div>
   <button class="undo" id="undoBtn" onclick="undoLast()" disabled>방금 기록 취소</button>
-
-  <div class="section-title">📊 요약</div>
-  <div class="stat-grid">
-    <div class="stat"><div class="n" id="stAvg">0</div><div class="l">하루 평균</div></div>
-    <div class="stat"><div class="n" id="st7">0</div><div class="l">최근 7일</div></div>
-    <div class="stat"><div class="n" id="stTotal">0</div><div class="l">전체 누적</div></div>
   </div>
 
-  <div class="section-title">💪 참기 · 스트릭</div>
-  <div class="stat-grid">
-    <div class="stat"><div class="n" id="stResistToday" style="color:var(--good)">0</div><div class="l">오늘 참음</div></div>
-    <div class="stat"><div class="n" id="stResistTotal" style="color:var(--good)">0</div><div class="l">누적 참음</div></div>
-    <div class="stat"><div class="n" id="stStreak">0</div><div class="l">목표 연속일</div></div>
+  <div class="panel" id="panelStats">
+  <div class="section-title">📊 한눈에 보기</div>
+  <div class="metrics">
+    <div class="mrow"><div class="mh">📈 흡연</div><div class="cells">
+      <div class="cell"><div class="n" id="stAvg">0</div><div class="l">하루 평균</div></div>
+      <div class="cell"><div class="n" id="st7">0</div><div class="l">최근 7일</div></div>
+      <div class="cell"><div class="n" id="stTotal">0</div><div class="l">전체 누적</div></div>
+    </div></div>
+    <div class="mrow"><div class="mh">💪 참기 · 스트릭</div><div class="cells">
+      <div class="cell"><div class="n g" id="stResistToday">0</div><div class="l">오늘 참음</div></div>
+      <div class="cell"><div class="n g" id="stResistTotal">0</div><div class="l">누적 참음</div></div>
+      <div class="cell"><div class="n" id="stStreak">0</div><div class="l">목표 연속일</div></div>
+    </div></div>
+    <div class="mrow"><div class="mh">💰 지출 · 절약</div><div class="cells">
+      <div class="cell"><div class="n m" id="mToday">0원</div><div class="l">오늘 지출</div></div>
+      <div class="cell"><div class="n m" id="mTotal">0원</div><div class="l">누적 지출</div></div>
+      <div class="cell"><div class="n g" id="savedMoney">—</div><div class="l">아낀 돈</div></div>
+    </div>
+    <div class="subhint" id="savedHint"></div>
+    </div>
   </div>
-
-  <div class="section-title">💰 지출 · 절약</div>
-  <div class="stat-grid" style="margin-bottom:8px;">
-    <div class="stat"><div class="n money" id="mToday">0원</div><div class="l">오늘 지출</div></div>
-    <div class="stat"><div class="n money" id="mTotal">0원</div><div class="l">누적 지출</div></div>
-    <div class="stat"><div class="n" id="savedMoney" style="color:var(--good)">—</div><div class="l">아낀 돈</div></div>
-  </div>
-  <div id="savedHint" style="margin:0 2px 16px; font-size:12px; color:var(--dim); text-align:center; line-height:1.5;"></div>
 
   <div class="section-title">🏅 성취</div>
   <div class="card"><div class="badges" id="badges"></div></div>
@@ -321,7 +345,8 @@
   <div class="section-title">📅 요일별 패턴</div>
   <div class="card"><div class="weekdays" id="weekdayRows"></div></div>
 
-  <div class="appver">줄담배 v1.5 · 2026-08-01</div>
+  <div class="appver">줄담배 v1.6 · 2026-08-01</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -668,6 +693,15 @@ function cycleTheme(){
   toast('테마: '+({auto:'자동',light:'라이트',dark:'다크'})[settings.theme]);
 }
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{ if(settings.theme==='auto') applyTheme(); });
+
+// ── 탭 ──
+function showTab(t){
+  document.getElementById('panelToday').classList.toggle('on', t==='today');
+  document.getElementById('panelStats').classList.toggle('on', t==='stats');
+  document.getElementById('tabToday').classList.toggle('on', t==='today');
+  document.getElementById('tabStats').classList.toggle('on', t==='stats');
+  window.scrollTo(0,0);
+}
 
 // ── 시트 ──
 function openMenu(){ showSheet('menuSheet'); }
